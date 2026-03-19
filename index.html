@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>KZStore // KZSTORE_NETWORK_v3.5</title>
+    <style>
+        /* KZSTORE - MEGA CODE EDITION v3.5 */
+        :root {
+            --neon-magenta: #ff00ff;
+            --neon-cyan: #00ffff;
+            --bg-dark: #000000;
+            --hacker-green: #00ff00;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        html, body {
+            margin: 0; padding: 0;
+            background: var(--bg-dark);
+            color: white;
+            font-family: 'Arial Black', sans-serif;
+            width: 100%;
+            overflow-x: hidden;
+            overflow-y: hidden; 
+            scroll-behavior: smooth;
+        }
+
+        /* --- BACKGROUND NEON LINES ENGINE --- */
+        #bg-matrix {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0; /* Paling dasar */
+            background: black;
+            pointer-events: none;
+        }
+
+        .scanner-lines {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: repeating-linear-gradient(0deg, rgba(0,0,0,0.25) 0px, rgba(0,0,0,0.25) 1px, transparent 1px, transparent 2px);
+            z-index: 1000; pointer-events: none;
+        }
+
+        /* --- ACCESS GATE (INTRO) --- */
+        #access-gate {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); /* Dibuat agak transparan biar garis kelihatan di intro */
+            display: flex; justify-content: center;
+            align-items: center; flex-direction: column; z-index: 10000;
+            padding: 20px;
+            backdrop-filter: blur(2px);
+        }
+
+        #gate-logo {
+            width: 85%; max-width: 450px; margin-bottom: 40px;
+            position: relative;
+            filter: drop-shadow(0 0 15px var(--neon-magenta));
+            animation: megaStutterRGB 4s infinite;
+        }
+
+        @keyframes megaStutterRGB {
+            0%, 70% { transform: translate(0) scale(1); filter: drop-shadow(0 0 15px var(--neon-magenta)); opacity: 1; }
+            71% { transform: translate(-8px, 4px); filter: drop-shadow(8px 0 0 red) drop-shadow(-8px 0 0 blue) drop-shadow(0 0 30px red); }
+            75% { transform: translate(8px, -4px); filter: drop-shadow(-8px 0 0 cyan) drop-shadow(8px 0 0 magenta) drop-shadow(0 0 40px cyan); opacity: 0.8; }
+            80% { transform: translate(-4px, -6px) scale(1.05); filter: drop-shadow(6px 6px 0 yellow) drop-shadow(0 0 50px yellow); }
+            85% { transform: translate(0) scale(1); filter: drop-shadow(0 0 20px white); opacity: 1; }
+            90% { transform: skew(10deg) translate(5px, 0); filter: drop-shadow(-8px 0 0 lime) drop-shadow(0 0 30px lime); }
+            95% { transform: skew(-10deg); filter: drop-shadow(8px 0 0 orange) drop-shadow(0 0 30px orange); }
+            100% { transform: translate(0); filter: drop-shadow(0 0 15px var(--neon-magenta)); }
+        }
+
+        #user-name {
+            background: #111; border: 2px solid var(--neon-magenta);
+            border-radius: 10px; padding: 15px; color: white;
+            font-size: 18px; text-align: center; margin-bottom: 20px;
+            width: 80%; max-width: 300px; outline: none;
+            box-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
+            position: relative; z-index: 10001;
+        }
+
+        #enter-btn {
+            background: black; border: 4px solid var(--neon-magenta);
+            color: var(--neon-magenta); padding: 25px 50px; font-size: 26px;
+            font-weight: bold; cursor: pointer; border-radius: 15px;
+            text-transform: uppercase; letter-spacing: 2px;
+            box-shadow: 0 0 20px var(--neon-magenta); transition: 0.3s;
+            position: relative; z-index: 10001;
+        }
+
+        #loading-box { display: none; width: 100%; max-width: 500px; margin-top: 30px; position: relative; z-index: 10001; }
+        #progress-bg { width: 100%; height: 15px; background: #111; border-radius: 8px; border: 1px solid #333; overflow: hidden; }
+        #progress-bar { width: 0%; height: 100%; background: var(--neon-cyan); box-shadow: 0 0 20px var(--neon-cyan); transition: width 0.1s; }
+        #terminal {
+            background: rgba(0,0,0,0.8); border: 1px solid #222; margin-top: 15px;
+            height: 120px; border-radius: 8px; padding: 10px; font-family: 'Courier New', monospace;
+            font-size: 13px; color: var(--hacker-green); overflow-y: hidden; text-align: left;
+        }
+
+        /* --- CONTENT UTAMA --- */
+        #main-content { 
+            display: none; 
+            opacity: 0; 
+            padding-top: 50px; 
+            background: transparent !important; 
+            position: relative; 
+            z-index: 10; 
+        }
+
+        .glitch-title {
+            font-size: 75px; text-transform: uppercase; font-style: italic;
+            position: relative; color: white; text-align: center;
+            text-shadow: 0.05em 0 0 var(--neon-magenta), -0.05em -0.025em 0 var(--neon-cyan);
+            animation: glitch 1.5s infinite;
+        }
+        @keyframes glitch {
+            0%, 14%, 49%, 99%, 100% { text-shadow: 0.05em 0 0 var(--neon-magenta), -0.05em -0.025em 0 var(--neon-cyan); }
+            15% { text-shadow: -0.05em -0.025em 0 var(--neon-magenta), 0.025em 0.025em 0 var(--neon-cyan); }
+            50% { text-shadow: 0.025em 0.05em 0 var(--neon-magenta), 0.05em 0 0 var(--neon-cyan); }
+        }
+
+        .marquee-container {
+            background: rgba(255, 0, 255, 0.15); border-top: 2px solid var(--neon-magenta);
+            border-bottom: 2px solid var(--neon-magenta); padding: 12px 0; margin: 30px 0;
+            backdrop-filter: blur(5px);
+        }
+
+        .grid-system {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 20px; padding: 15px; max-width: 700px; margin: 0 auto;
+        }
+
+        .card-pro {
+            background: rgba(10, 10, 10, 0.8); /* Transparan biar garis tembus */
+            backdrop-filter: blur(8px);
+            border: 5px solid var(--neon-magenta); border-radius: 25px;
+            padding: 15px; position: relative;
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.4);
+            animation: breatheBorder 4s infinite ease-in-out;
+            display: flex; flex-direction: column; justify-content: space-between;
+        }
+        @keyframes breatheBorder { 
+            0%, 100% { border-color: var(--neon-magenta); box-shadow: 0 0 15px var(--neon-magenta); }
+            50% { border-color: #aa00aa; box-shadow: 0 0 30px var(--neon-magenta); }
+        }
+
+        .img-box { 
+            width: 100%; aspect-ratio: 1 / 1; 
+            border: 2px solid #ffffff; border-radius: 15px; 
+            overflow: hidden; margin-bottom: 10px; background: #111;
+        }
+        .img-box img { width: 100%; height: 100%; display: block; object-fit: cover; }
+
+        .card-pro h2 { font-size: 19px; margin: 5px 0; text-transform: uppercase; letter-spacing: 1px; color: white; text-align: center; }
+        .card-pro .price { font-size: 30px; color: var(--neon-cyan); font-weight: 900; margin: 10px 0; text-shadow: 0 0 10px var(--neon-cyan); text-align: center; }
+
+        .btn-pro {
+            width: 100%; padding: 18px 0; background: var(--neon-magenta);
+            border: none; border-radius: 12px; color: white; font-weight: 900;
+            font-size: 18px; text-transform: uppercase; cursor: pointer;
+            box-shadow: 0 5px 0 #909; transition: 0.1s;
+        }
+        .btn-pro:active { transform: translateY(5px); box-shadow: 0 0 0 #000; }
+
+        .popup-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.98); z-index: 50000;
+        }
+        .popup-box { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 400px; text-align: center; }
+        .popup-box img { width: 100%; border: 6px solid var(--neon-magenta); border-radius: 30px; box-shadow: 0 0 50px var(--neon-magenta); }
+        .close-btn { font-size: 70px; color: #ff00ff; position: absolute; top: -80px; right: 0; cursor: pointer; }
+
+    </style>
+</head>
+<body id="master-body">
+
+    <canvas id="bg-matrix"></canvas>
+    <div class="scanner-lines"></div>
+
+    <div id="access-gate">
+        <img src="kocakjir.png" id="gate-logo" onerror="this.src='https://via.placeholder.com/400x400/000000/ff00ff?text=KZSTORE'">
+        <input type="text" id="user-name" placeholder="NICKNAME MINECRAFT..." autocomplete="off">
+        <button id="enter-btn" onclick="checkAndGo()">MASUK KE WEB</button>
+        <div id="loading-box">
+            <div id="progress-bg"><div id="progress-bar"></div></div>
+            <div id="terminal"></div>
+        </div>
+    </div>
+
+    <div id="main-content">
+        <h1 class="glitch-title">KZStore</h1>
+        <div class="marquee-container">
+            <marquee scrollamount="8">>>> AUTHENTICATION SUCCESSFUL // ENCRYPTED NODE v3.5 // WELCOME <span id="welcome-name"></span> // STOCK UPDATED >>> </marquee>
+        </div>
+
+        <div class="grid-system">
+            <div class="card-pro">
+                <div class="img-box"><img src="default1.png" onerror="this.src='https://via.placeholder.com/300?text=default1+IMG'"></div>
+                <h2>lagi kosong nyet</h2>
+                <div class="price">15K</div>
+                <button class="btn-pro" onclick="openOrder('default1', 'qrisnibos.png')">GET ACCESS</button>
+            </div>
+            <div class="card-pro">
+                <div class="img-box"><img src="default2.png" onerror="this.src='https://via.placeholder.com/300?text=default2+IMG'"></div>
+                <h2>lagi kosong nyet</h2>
+                <div class="price">15K</div>
+                <button class="btn-pro" onclick="openOrder('default2', 'qrisnibos.png')">GET ACCESS</button>
+            </div>
+            <div class="card-pro">
+                <div class="img-box"><img src="default3.png" onerror="this.src='https://via.placeholder.com/300?text=default3+IMG'"></div>
+                <h2>lagi kosong nyet</h2>
+                <div class="price">25K</div>
+                <button class="btn-pro" onclick="openOrder('default3', 'qrisnibos.png')">GET ACCESS</button>
+            </div>
+            <div class="card-pro">
+                <div class="img-box"><img src="default4.png" onerror="this.src='https://via.placeholder.com/300?text=SLAYER+IMG'"></div>
+                <h2>lagi kosong nyet</h2>
+                <div class="price">30K</div>
+                <button class="btn-pro" onclick="openOrder('default4', 'qrisnibos.png')">GET ACCESS</button>
+            </div>
+        </div>
+        <p style="text-align: center; margin-top: 50px; color: #444; font-size: 12px; position: relative; z-index: 11;">© 2026 KZSTORE SECURITY SERVICES. ALL RIGHTS RESERVED.</p>
+    </div>
+
+    <div class="popup-overlay" id="popup-qris">
+        <div class="popup-box">
+            <span class="close-btn" onclick="closeOrder()">&times;</span>
+            <img id="qris-img">
+            <h2 style="color: var(--neon-magenta); margin-top: 20px;">SCAN TO AUTHORIZE</h2>
+        </div>
+    </div>
+
+    <script>
+        /* --- BACKGROUND ANIMATION ENGINE --- */
+        const canvas = document.getElementById('bg-matrix');
+        const ctx = canvas.getContext('2d');
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        let lines = [];
+        for (let i = 0; i < 50; i++) {
+            lines.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                speed: Math.random() * 2 + 1,
+                len: Math.random() * 150 + 50,
+                color: Math.random() > 0.5 ? '#ff00ff' : '#00ffff'
+            });
+        }
+
+        function drawLines() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            lines.forEach(l => {
+                ctx.strokeStyle = l.color;
+                ctx.lineWidth = 2;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = l.color;
+                ctx.beginPath();
+                ctx.moveTo(l.x, l.y);
+                ctx.lineTo(l.x, l.y + l.len);
+                ctx.stroke();
+                l.y += l.speed;
+                if (l.y > canvas.height) {
+                    l.y = -l.len;
+                    l.x = Math.random() * canvas.width;
+                }
+            });
+            requestAnimationFrame(drawLines);
+        }
+        drawLines();
+
+        /* --- LOGIC ASLI LU (TIDAK DIUBAH) --- */
+        function checkAndGo() {
+            const name = document.getElementById('user-name').value;
+            if (name.trim() === "") {
+                alert("nama lu di isi dlu kon***");
+                return;
+            }
+            document.getElementById('user-name').style.display = 'none';
+            document.getElementById('welcome-name').innerText = name.toUpperCase();
+            megaLoading();
+        }
+
+        function megaLoading() {
+            const btn = document.getElementById('enter-btn');
+            const box = document.getElementById('loading-box');
+            const bar = document.getElementById('progress-bar');
+            const term = document.getElementById('terminal');
+            const gate = document.getElementById('access-gate');
+            const main = document.getElementById('main-content');
+            const body = document.getElementById('master-body');
+
+            btn.style.display = 'none';
+            box.style.display = 'block';
+
+            let progress = 0;
+            const messages = [
+                "Bypassing KZSTORE Firewall...",
+                "Injecting SQL Payload...",
+                "Decoding AES-256 Assets...",
+                "Fetching DB_Products...",
+                "Establishing SSL Mirror...",
+                "Accessing Mainframe...",
+                "SUCCESS: NODE UNLOCKED!"
+            ];
+
+            let msgIdx = 0;
+            let timer = setInterval(() => {
+                progress += Math.random() * 5;
+                if(progress > 100) progress = 100;
+                bar.style.width = progress + "%";
+                if(progress >= 100 && msgIdx >= messages.length) {
+                    clearInterval(timer);
+                    finishLoading();
+                }
+            }, 150);
+
+            function typeWriter(text, i, cb) {
+                if (i < text.length) {
+                    term.innerHTML += text.charAt(i);
+                    setTimeout(() => typeWriter(text, i + 1, cb), 20);
+                } else {
+                    term.innerHTML += "<br>";
+                    cb();
+                }
+            }
+
+            function sequence() {
+                if(msgIdx < messages.length) {
+                    typeWriter("> " + messages[msgIdx], 0, () => {
+                        msgIdx++;
+                        setTimeout(sequence, 100);
+                    });
+                }
+            }
+            sequence();
+
+            function finishLoading() {
+                setTimeout(() => {
+                    gate.style.transition = "1.5s cubic-bezier(0.7, 0, 0.3, 1)";
+                    gate.style.opacity = "0";
+                    gate.style.transform = "scale(1.5)";
+                    main.style.display = "block";
+                    setTimeout(() => { main.style.opacity = "1"; }, 100);
+                    body.style.overflowY = "auto";
+                    document.documentElement.style.overflowY = "auto";
+                    setTimeout(() => { gate.style.display = "none"; }, 1500);
+                }, 500);
+            }
+        }
+
+        function openOrder(produk, img) {
+            const name = document.getElementById('welcome-name').innerText;
+            const waNumber = "6285877898356";
+            const text = "Nama: " + name + "\nProduk yg di beli: " + produk + "\nHARAP QRIS TERLEBIH DAHULU!";
+            const waLink = "https://api.whatsapp.com/send?phone=" + waNumber + "&text=" + encodeURIComponent(text);
+            document.getElementById('popup-qris').style.display = 'block';
+            document.getElementById('qris-img').src = img;
+            window.open(waLink, '_blank');
+            if(navigator.vibrate) navigator.vibrate([100, 50, 100]);
+        }
+
+        function closeOrder() {
+            document.getElementById('popup-qris').style.display = 'none';
+            alert("Harap tunggu 1 hari untuk mengantar pesanan anda");
+        }
+    </script>
+</body>
+</html>
